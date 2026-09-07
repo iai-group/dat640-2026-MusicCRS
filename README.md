@@ -1,4 +1,4 @@
-# DAT640-2025 MusicCRS starting package
+# DAT640-2026 MusicCRS starting package
 
 This repository contains a starting package for the MusicCRS group project.
 

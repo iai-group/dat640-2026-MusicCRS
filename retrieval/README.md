@@ -20,18 +20,8 @@ retrieval/
     └── evaluate.py            # evaluate() + CLI runner
 ```
 
-## Dataset
-
-All data is part of the [TalkPlay Data Challenge](https://huggingface.co/collections/talkpl-ai/talkplay-data-challenge)
-collection on Hugging Face (the RecSys 2026 MusicCRS challenge dataset).
-
-| Dataset | Size | Description |
-|---|---|---|
-| [`TalkPlayData-Challenge-Dataset`](https://huggingface.co/datasets/talkpl-ai/TalkPlayData-Challenge-Dataset) | 15,199 train sessions, 1,000 test sessions | Multi-turn (8-turn) music conversations with user profiles, conversation goals, and goal-progress assessments. Ground truth (gold track + response per turn) is embedded in each session's `conversations` field. |
-| [`TalkPlayData-Challenge-Track-Metadata`](https://huggingface.co/datasets/talkpl-ai/TalkPlayData-Challenge-Track-Metadata) | 47,071 tracks | Track metadata: name, artist, album, tags, popularity, release date. |
-| [`TalkPlayData-Challenge-User-Metadata`](https://huggingface.co/datasets/talkpl-ai/TalkPlayData-Challenge-User-Metadata) | 9,090 users | User demographics: age, gender, country. |
-| [`TalkPlayData-Challenge-Track-Embeddings`](https://huggingface.co/datasets/talkpl-ai/TalkPlayData-Challenge-Track-Embeddings) | 47,071 tracks | Pre-computed track embeddings: audio (LAION-CLAP), cover image (SigLIP2), collaborative filtering (BPR), and text (Qwen3-Embedding-0.6B) over attributes, lyrics, and metadata. |
-| [`TalkPlayData-Challenge-User-Embeddings`](https://huggingface.co/datasets/talkpl-ai/TalkPlayData-Challenge-User-Embeddings) | 9,090 users | Pre-computed collaborative filtering (BPR) user embeddings. |
+See the top-level [README's Dataset section](../README.md#dataset) for what
+data is available in the RecSys 2026 MusicCRS challenge collection.
 
 ## Setup
 

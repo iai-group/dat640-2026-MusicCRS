@@ -55,6 +55,46 @@ This should automatically launch the client in your browser, and the client shou
 The page will reload if you make edits.
 You will also see any lint errors in the console.
 
+## Dataset
+
+All data is part of the [TalkPlay Data Challenge](https://huggingface.co/collections/talkpl-ai/talkplay-data-challenge)
+collection on Hugging Face — the same challenge dataset used in the RecSys 2026 MusicCRS challenge.
+
+| Dataset | Size | Description |
+|---|---|---|
+| [`TalkPlayData-Challenge-Dataset`](https://huggingface.co/datasets/talkpl-ai/TalkPlayData-Challenge-Dataset) | 15,199 train sessions, 1,000 test sessions | Multi-turn (8-turn) music conversations with user profiles, conversation goals, and goal-progress assessments. Ground truth (gold track + response per turn) is embedded in each session's `conversations` field. |
+| [`TalkPlayData-Challenge-Track-Metadata`](https://huggingface.co/datasets/talkpl-ai/TalkPlayData-Challenge-Track-Metadata) | 47,071 tracks | Track metadata: name, artist, album, tags, popularity, release date. |
+| [`TalkPlayData-Challenge-User-Metadata`](https://huggingface.co/datasets/talkpl-ai/TalkPlayData-Challenge-User-Metadata) | 9,090 users | User demographics: age, gender, country. |
+| [`TalkPlayData-Challenge-Track-Embeddings`](https://huggingface.co/datasets/talkpl-ai/TalkPlayData-Challenge-Track-Embeddings) | 47,071 tracks | Pre-computed track embeddings: audio (LAION-CLAP), cover image (SigLIP2), collaborative filtering (BPR), and text (Qwen3-Embedding-0.6B) over attributes, lyrics, and metadata. |
+| [`TalkPlayData-Challenge-User-Embeddings`](https://huggingface.co/datasets/talkpl-ai/TalkPlayData-Challenge-User-Embeddings) | 9,090 users | Pre-computed collaborative filtering (BPR) user embeddings. |
+
+See [retrieval/README.md](retrieval/README.md) for how these are loaded and used.
+
+## Retrieval
+
+The [retrieval](retrieval/) folder contains a text-to-item retrieval component over
+the track metadata catalog above — a BM25 baseline, a data loader, and evaluation
+utilities (nDCG, catalog/lexical diversity) for scoring predictions against the
+challenge dataset's ground truth. New retrieval methods (e.g. dense, hybrid) plug
+into the same `RetrievalModule` interface and can be run and evaluated the same
+way — see [retrieval/README.md](retrieval/README.md) for the interface, setup,
+usage, and baseline results.
+
+Minimal example of running and scoring a single query:
+
+```python
+from retrieval import BM25Retriever
+from retrieval.evaluation import compute_ndcg_metrics
+
+retriever = BM25Retriever()  # downloads + indexes the track catalog on first run
+track_ids = retriever.text_to_item_retrieval("upbeat pop song", topk=5)
+
+compute_ndcg_metrics(preds=track_ids, gold=["some_gold_track_id"], k_values=[1, 5])
+```
+
+For evaluating a full baseline against the challenge devset (ground truth extraction,
+prediction generation, and scoring), see [retrieval/README.md](retrieval/README.md).
+
 ## Structuring responses
 
 Use the `AnnotatedUtterance` class in Python to when sending responses from the agent.

@@ -61,7 +61,7 @@ All data is part of the [TalkPlay Data Challenge](https://huggingface.co/collect
 collection on Hugging Face — the same challenge dataset used in the RecSys 2026 MusicCRS challenge.
 
 | Dataset | Size | Description |
-|---|---|---|
+| --- | --- | --- |
 | [`TalkPlayData-Challenge-Dataset`](https://huggingface.co/datasets/talkpl-ai/TalkPlayData-Challenge-Dataset) | 15,199 train sessions, 1,000 test sessions | Multi-turn (8-turn) music conversations with user profiles, conversation goals, and goal-progress assessments. Ground truth (gold track + response per turn) is embedded in each session's `conversations` field. |
 | [`TalkPlayData-Challenge-Track-Metadata`](https://huggingface.co/datasets/talkpl-ai/TalkPlayData-Challenge-Track-Metadata) | 47,071 tracks | Track metadata: name, artist, album, tags, popularity, release date. |
 | [`TalkPlayData-Challenge-User-Metadata`](https://huggingface.co/datasets/talkpl-ai/TalkPlayData-Challenge-User-Metadata) | 9,090 users | User demographics: age, gender, country. |
@@ -74,11 +74,11 @@ See [retrieval/README.md](retrieval/README.md) for how these are loaded and used
 
 The [retrieval](retrieval/) folder contains a text-to-item retrieval component over
 the track metadata catalog above — a BM25 baseline, a data loader, and evaluation
-utilities (nDCG, catalog/lexical diversity) for scoring predictions against the
-challenge dataset's ground truth. New retrieval methods (e.g. dense, hybrid) plug
-into the same `RetrievalModule` interface and can be run and evaluated the same
-way — see [retrieval/README.md](retrieval/README.md) for the interface, setup,
-usage, and baseline results.
+utilities (nDCG, item/catalog diversity, and a combined final score) for scoring
+predictions against the challenge dataset's ground truth. New retrieval methods
+(e.g. dense, hybrid) plug into the same `RetrievalModule` interface and can be run
+and evaluated the same way — see [retrieval/README.md](retrieval/README.md) for
+the interface, setup, usage, and baseline results.
 
 Minimal example of running and scoring a single query:
 
@@ -209,7 +209,7 @@ curl https://ollama.ux.uis.no/api/generate \
   -H "Authorization: Bearer YOUR_API_KEY_HERE" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "llama3.3:70b",
+    "model": "llama3:8b",
     "prompt": "What is the capital of Norway?",
     "stream": false
   }'
@@ -228,7 +228,7 @@ client = Client(host="http://ollama.ux.uis.no")
 
 # Generate a single completion
 response = client.generate(
-    model="llama3.3:70b",
+    model="llama3:8b",
     prompt="What is the capital of Norway?",
     options={
       "stream": False,

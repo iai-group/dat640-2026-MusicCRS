@@ -14,10 +14,10 @@ retrieval/
 ├── bm25.py                # BM25Retriever — BM25 baseline
 ├── run_bm25_baseline.py   # generates BM25 predictions over a dialogue dataset split
 └── evaluation/
-    ├── metrics.py             # nDCG (primary metric)
-    ├── diversity.py           # catalog + lexical (Distinct-2) diversity
+    ├── metrics.py             # nDCG
+    ├── diversity.py           # item (catalog) diversity
     ├── make_ground_truth.py   # extract ground truth from the challenge dialogue dataset
-    └── evaluate.py            # evaluate() + CLI runner
+    └── evaluate.py            # evaluate() + CLI runner — nDCG, diversity, and final_score
 ```
 
 See the top-level [README's Dataset section](../README.md#dataset) for what
@@ -61,10 +61,6 @@ each turn embeds the gold track ID and gold response directly in its
 python3 -m retrieval.evaluation.make_ground_truth --split test --output path/to/ground_truth.json
 ```
 
-The `talkpl-ai/TalkPlayData-Challenge-Blind-A` set (and Blind B, released
-later) has no public ground truth — those are scored server-side on the
-official [CodaBench](https://www.codabench.org/) leaderboard, not locally.
-
 ### Generating BM25 predictions
 
 `run_bm25_baseline.py` retrieves top-k track IDs for every session x turn in a
@@ -81,11 +77,12 @@ python3 -m retrieval.run_bm25_baseline --split test --topk 20 --output path/to/p
 
 ### Scoring predictions
 
-`evaluate()` computes macro-averaged nDCG@{1,10,20} plus catalog and lexical
-diversity, given predictions and ground truth in the challenge format:
+`evaluate()` computes macro-averaged nDCG@{1,10,20}, item (catalog)
+diversity, and a combined **final score**, given predictions and ground
+truth in the challenge format:
 
-- Predictions: list of `{session_id, turn_number, predicted_track_ids, predicted_response}`
-- Ground truth: list of `{session_id, turn_number, ground_truth_track_id}`
+  - Predictions: list of `{session_id, turn_number, predicted_track_ids, predicted_response}`
+  - Ground truth: list of `{session_id, turn_number, ground_truth_track_id}`
 
 ```bash
 python3 -m retrieval.evaluation.evaluate \
@@ -98,25 +95,28 @@ python3 -m retrieval.evaluation.evaluate \
 Or from Python:
 
 ```python
-from retrieval.evaluation import compute_ndcg_metrics, compute_catalog_diversity, compute_lexical_diversity
+from retrieval.evaluation import compute_ndcg_metrics, compute_catalog_diversity
 ```
+
+#### Final score
+
+Submissions for the item ranking task are ranked by a single combined score:
+
+```
+final_score = 0.8 * nDCG@20 + 0.2 * catalog_diversity
+```
+
+nDCG@20 rewards ranking the correct track highly; catalog diversity
+(unique recommended tracks / catalog size) rewards not just recommending
+the same popular handful of tracks to everyone. `evaluate()` returns this
+as `final_score` alongside the individual metrics.
 
 ### BM25 baseline results (test split, 1,000 sessions x 8 turns)
 
 | Metric | Value |
-|---|---:|
+| --- | ---: |
 | nDCG@1 | 0.0101 |
 | nDCG@10 | 0.0644 |
 | nDCG@20 | 0.0828 |
 | Catalog diversity | 0.3906 |
-| Lexical diversity | 0.0000 (no response generation) |
-
-In line with the `music-crs-evaluator` baseline's LLaMA-1B+BM25 numbers
-(nDCG@10 = 0.0627, nDCG@20 = 0.0815); the small gap is expected since that
-baseline additionally uses an LLM for response generation while ours is
-retrieval only.
-
-## Notes
-
-- `retrieval/evaluation` currently imports `retrieval/__init__.py`, which pulls in
-  `datasets`/`bm25s`, even though evaluation itself only needs `numpy`.
+| **Final score** | **0.1444** |

@@ -9,9 +9,12 @@ import argparse
 import json
 
 from .metrics import compute_ndcg_metrics
-from .diversity import compute_catalog_diversity, compute_lexical_diversity
+from .diversity import compute_catalog_diversity
 
 DEFAULT_K_VALUES = [1, 10, 20]
+FINAL_SCORE_NDCG_K = 20
+FINAL_SCORE_NDCG_WEIGHT = 0.8
+FINAL_SCORE_DIVERSITY_WEIGHT = 0.2
 
 
 def evaluate(
@@ -37,7 +40,6 @@ def evaluate(
 
     per_turn_scores = []
     all_recommended_track_ids = []
-    all_responses = []
     for gt in ground_truth:
         key = (gt["session_id"], gt["turn_number"])
         pred = preds_by_key[key]
@@ -48,7 +50,6 @@ def evaluate(
         )
         per_turn_scores.append(scores)
         all_recommended_track_ids.extend(pred["predicted_track_ids"])
-        all_responses.append(pred.get("predicted_response", ""))
 
     macro_results = {
         metric: sum(s[metric] for s in per_turn_scores) / len(per_turn_scores)
@@ -57,7 +58,10 @@ def evaluate(
     macro_results["catalog_diversity"] = compute_catalog_diversity(
         all_recommended_track_ids, catalog_size
     )
-    macro_results["lexical_diversity"] = compute_lexical_diversity(all_responses)
+    macro_results["final_score"] = (
+        FINAL_SCORE_NDCG_WEIGHT * macro_results[f"ndcg@{FINAL_SCORE_NDCG_K}"]
+        + FINAL_SCORE_DIVERSITY_WEIGHT * macro_results["catalog_diversity"]
+    )
     return macro_results
 
 
